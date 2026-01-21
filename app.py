@@ -4,10 +4,11 @@ from dotenv import load_dotenv
 import requests
 import json
 
-# Page ki setting (title aur icon)
-st.set_page_config(page_title="Sales AI Agent", page_icon="💰")
+# Page configuration
+st.set_page_config(page_title="AI Sales Outreach Agent", page_icon="✉️")
 
 load_dotenv()
+# Streamlit Cloud par ye 'st.secrets' se uthayega, local par '.env' se
 api_key = os.getenv('OPENROUTER_API_KEY')
 
 def ask_ai(prompt):
@@ -19,32 +20,51 @@ def ask_ai(prompt):
     data = {
         "model": "meta-llama/llama-3.3-70b-instruct:free",
         "messages": [
-            {"role": "system", "content": "You are a world-class Sales Expert. Write persuasive emails."},
-            {"role": "user", "content": f"Write a cold email for: {prompt}"}
+            {
+                "role": "system", 
+                "content": "You are a world-class Sales & Cold Outreach Expert. Write highly persuasive, concise, and professional cold emails. Focus on benefits and a clear call to action."
+            },
+            {"role": "user", "content": f"Generate a high-converting cold email based on these details: {prompt}"}
         ]
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
     return response.json()['choices'][0]['message']['content']
 
 # --- UI Design ---
-st.title("🚀 Sales Expert AI Agent")
-st.subheader("Likhein kiske liye email chahiye, Agent khud likh dega!")
+st.title("🚀 AI Sales Outreach Agent")
+st.markdown("### Elevate your sales game with high-converting cold emails.")
 
-# Input field
-user_prompt = st.text_area("Yahan details likhein (e.g. Selling SEO services to a dentist):", placeholder="Enter your product/service details...")
+# Input section
+st.divider()
+user_prompt = st.text_area(
+    "Describe your offer and target audience:", 
+    placeholder="Example: Selling high-end SEO services to Dental Clinics in New York...",
+    height=150
+)
 
-# Button
-if st.button("Generate Cold Email"):
+# Execution section
+if st.button("Generate Professional Email"):
     if user_prompt:
-        with st.spinner("Agent soch raha hai..."):
+        with st.spinner("Our AI Expert is crafting your email..."):
             try:
                 email_content = ask_ai(user_prompt)
-                st.success("Email Taiyar Hai!")
-                # Result ko box mein dikhana
-                st.text_area("AI Generated Email:", value=email_content, height=300)
-                # Copy button ka kaam bhi asaan ho jata hai
-                st.download_button("Download Email as Text", email_content)
+                st.success("Your email is ready!")
+                
+                # Output Display
+                st.subheader("Generated Email Draft")
+                st.text_area("", value=email_content, height=400)
+                
+                # Actions
+                st.download_button(
+                    label="📥 Download Email Draft",
+                    data=email_content,
+                    file_name="cold_email.txt",
+                    mime="text/plain"
+                )
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"An error occurred: {e}")
     else:
-        st.warning("Pehle kuch likhein to sahi!")
+        st.warning("Please provide some details about your outreach target.")
+
+st.divider()
+st.caption("Powered by Llama 3.3 | Developed for Professional Sales Teams")
